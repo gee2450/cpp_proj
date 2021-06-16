@@ -100,6 +100,6 @@ WINDOW& Mission::update() {
 void Mission::check(Score& score) {
   length_check = (score.max_length >= length) ? true : false;
   growth_items_check = (score.growth_items >= growth_items) ? true : false;
-  poison_items_check = (score.poison_items <= poison_items) ? true : false;
+  poison_items_check = (score.poison_items >= poison_items) ? true : false;
   gate_cnt_check = (score.gate_cnt >= gate_cnt) ? true : false;
 }
