@@ -17,17 +17,20 @@ class Snake {
   bool test_add = false;
 public:
   bool* flag;
-  Snake(int step, bool& flag, WINDOW& win, vector<vector<int>>& map);
+  Snake(int step, bool& flag, WINDOW& win,
+        vector<vector<int>>& origin_map, vector<vector<int>>& map);
   void position();
   void get_key();
   bool length_rule();
 };
 
-Snake::Snake(int step, bool& flag, WINDOW& win, vector<vector<int>>& map) {
+Snake::Snake(int step, bool& flag, WINDOW& win,
+             vector<vector<int>>& origin_map, vector<vector<int>>& map)
+{
   this->step = step;
   this->win = &win;
   this->map = map;
-  origin_map = this->map;
+  this->origin_map = origin_map;
   state = "left";
   this->flag = &flag;
 
@@ -43,16 +46,27 @@ Snake::Snake(int step, bool& flag, WINDOW& win, vector<vector<int>>& map) {
   else if (step==3)
     start = deque<int>(11, 11);
 
-  s_body.push_back(deque<int>(start[0], start[1]+1));
-  s_body.push_back(deque<int>(start[0], start[1]+2));
-  map[start[0]][start[1]+1] = 4; map[start[0]][start[1]+2] = 4;
+  deque<int> ret;
+  ret.push_back(start[0]+1); ret.push_back(start[1]);
+  s_body.push_back(ret);
+  ret.clear();
+  ret.push_back(start[0]+2); ret.push_back(start[1]);
+  s_body.push_back(ret);
+  map[start[0]][start[1]] = 3;
+  map[start[0]+1][start[1]] = 4;
+  map[start[0]+2][start[1]] = 4;
 
   // snake window에 표시
   mvwprintw(this->win, start[1]+1, start[0]+1, to_string(3).c_str());
-  mvwprintw(this->win, s_body.front()[1]+1, s_body.front()[0]+1, to_string(4).c_str());
-  mvwprintw(this->win, s_body.back()[1]+1, s_body.back()[0]+1, to_string(4).c_str());
+  mvwprintw(this->win, start[1]+1, start[0]+2, to_string(4).c_str());
+  mvwprintw(this->win, start[1]+1, start[0]+3, to_string(4).c_str());
 
+  touchwin(this->win);
+  wrefresh(this->win);
+
+  getch();
 }
+
 void Snake::position() {
   // 머리 부분 3->4로 바꿈. 즉 머리를 body에 집어넣음
   map[start[0]][start[1]] = 4;
@@ -65,8 +79,7 @@ void Snake::position() {
   // tail 없애고, 원래 상태로 복귀
   else {
     map[s_body.back()[0]][s_body.back()[1]] = origin_map[s_body.back()[0]][s_body.back()[1]];
-    mvwprintw(win, s_body.back()[1]+1, s_body.back()[0]+1,
-              to_string(origin_map[s_body.back()[0]][s_body.back()[1]]).c_str());
+    mvwprintw(win, s_body.back()[1]+1, s_body.back()[0]+1, to_string(0).c_str());
     s_body.pop_back();
   }
 
@@ -80,7 +93,14 @@ void Snake::position() {
   touchwin(win);
   wrefresh(win);
 
-  if (map[start[0]][start[1]] != 0) {
+  if (map[start[0]][start[1]] == 5) {
+    // growth
+    test_add = true;
+  }
+  else if (map[start[0]][start[1]] == 6) {
+    // poison
+  }
+  else if (map[start[0]][start[1]] != 0) {
     *flag = false;
     get_key();
   }
