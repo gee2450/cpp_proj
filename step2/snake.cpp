@@ -52,9 +52,9 @@ Snake::Snake(int step, bool& flag, WINDOW& win,
   ret.clear();
   ret.push_back(start[0]+2); ret.push_back(start[1]);
   s_body.push_back(ret);
-  map[start[0]][start[1]] = 3;
-  map[start[0]+1][start[1]] = 4;
-  map[start[0]+2][start[1]] = 4;
+  map[start[1]][start[0]] = 3;
+  map[start[1]+1][start[0]] = 4;
+  map[start[1]+2][start[0]] = 4;
 
   // snake window에 표시
   mvwprintw(this->win, start[1]+1, start[0]+1, to_string(3).c_str());
@@ -69,19 +69,18 @@ Snake::Snake(int step, bool& flag, WINDOW& win,
 
 void Snake::position() {
   // 머리 부분 3->4로 바꿈. 즉 머리를 body에 집어넣음
-  map[start[0]][start[1]] = 4;
+  map[start[1]][start[0]] = 4;
   mvwprintw(win, start[1]+1, start[0]+1, to_string(4).c_str());
   s_body.push_front(start);
 
-  // add 시험용 코드입니다.
-  if (test_add) { test_add = false; }
-
-  // tail 없애고, 원래 상태로 복귀
-  else {
-    map[s_body.back()[0]][s_body.back()[1]] = origin_map[s_body.back()[0]][s_body.back()[1]];
+  // tail 없앰
+  if (test_add == false) {
+    map[s_body.back()[1]][s_body.back()[0]] = origin_map[s_body.back()[1]][s_body.back()[0]];
     mvwprintw(win, s_body.back()[1]+1, s_body.back()[0]+1, to_string(0).c_str());
     s_body.pop_back();
   }
+
+  test_add = false;
 
   if (state == "left") start[0]--;
   else if (state == "right") start[0]++;
@@ -93,14 +92,17 @@ void Snake::position() {
   touchwin(win);
   wrefresh(win);
 
-  if (map[start[0]][start[1]] == 5) {
+  if (map[start[1]][start[0]] == 5) {
     // growth
     test_add = true;
   }
-  else if (map[start[0]][start[1]] == 6) {
+  else if (map[start[1]][start[0]] == 6) {
     // poison
+    map[s_body.back()[1]][s_body.back()[0]] = 0;
+    mvwprintw(win, s_body.back()[1]+1, s_body.back()[0]+1, to_string(0).c_str());
+    s_body.pop_back();
   }
-  else if (map[start[0]][start[1]] != 0) {
+  else if (map[start[1]][start[0]] != 0) {
     *flag = false;
     get_key();
   }
